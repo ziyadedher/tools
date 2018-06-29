@@ -1,5 +1,5 @@
 #include <string.h>
-// #include "echo/echo.h"
+#include "echo/echo.h"
 #include "_parser.h"
 
 
@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
 
   switch (tool) {
     case 0:
-      // echo(argc - 2, argv + 2);
+      echo(argc - 2, argv + 2);
       break;
 
     default:
