@@ -40,8 +40,7 @@ INSTALL_PREFIX = usr/local
 # Generally should not need to edit below this line
 
 # Testing framework options
-all-tests := $(addsuffix .test, $(basename $(wildcard *.test-in)))
-BC := /usr/bin/bc
+all-tests := $(addsuffix .test, $(basename $(shell find test/ -name '*.test-in')))
 
 # Obtains the OS type, either 'Darwin' (OS X) or 'Linux'
 UNAME_S:=$(shell uname -s)
@@ -180,10 +179,22 @@ endif
 	@echo -n "Total build time: "
 	@$(END_TIME)
 
-.PHONY : test all %.test
-test : $(all-tests)
-%.test : %.test-in %.test-cmp $(BC)
-	@$(BC) <$< 2>&1 | diff -q $(word 2, $?) - >/dev/null || (echo "Test $@ failed" && exit 1)
+.PHONY: test
+test: dirs
+ifeq ($(USE_VERSION), true)
+	@echo "Beginning test build v$(VERSION_STRING)"
+else
+	@echo "Beginning test build"
+endif
+	@$(START_TIME)
+	@$(MAKE) all --no-print-directory
+	@echo -n "Total build time: "
+	@$(END_TIME)
+	@$(MAKE) $(all-tests) --no-print-directory
+
+.PHONY: %.test
+%.test : %.test-in %.test-cmp
+	@$(BIN_PATH)/$(BIN_NAME) $(shell cat $<) | diff - $(word 2, $?) || (echo "Test $@ failed" && exit 1)
 
 # Main rule, checks the executable and symlinks to the output
 .PHONY: all

@@ -2,7 +2,5 @@
 #include "_parser.h"
 
 void echo(int argc, char** argv) {
-  // struct arguments arguments = parse(argc, argv);
-  for (; argc; --argc, ++argv) printf("%s ", *argv);
-  printf("\n");
+  for (; argc; --argc, ++argv) printf(argc - 1 ? "%s " : "%s\n", *argv);
 }
