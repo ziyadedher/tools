@@ -162,7 +162,7 @@ else
 	@echo "Beginning release build"
 endif
 	@$(START_TIME)
-	@$(MAKE) all --no-print-directory
+	@$(MAKE) inbuild --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
 
@@ -175,10 +175,11 @@ else
 	@echo "Beginning debug build"
 endif
 	@$(START_TIME)
-	@$(MAKE) all
+	@$(MAKE) inbuild --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
 
+# Test build with testing
 .PHONY: test
 test: dirs
 ifeq ($(USE_VERSION), true)
@@ -187,7 +188,7 @@ else
 	@echo "Beginning test build"
 endif
 	@$(START_TIME)
-	@$(MAKE) all --no-print-directory
+	@$(MAKE) inbuild --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
 	@$(MAKE) $(all-tests) --no-print-directory
@@ -196,9 +197,17 @@ endif
 %.test : %.test-in %.test-cmp
 	@$(BIN_PATH)/$(BIN_NAME) $(shell cat $<) | diff - $(word 2, $?) || (echo "Test $@ failed" && exit 1)
 
-# Main rule, checks the executable and symlinks to the output
+# Generate all tests
+gentests:
+	@find test/ -name gentest.sh -exec {} \;
+
+# All rule
 .PHONY: all
-all: $(BIN_PATH)/$(BIN_NAME)
+all: debug gentests test release
+
+# Main rule, checks the executable and symlinks to the output
+.PHONY: inbuild
+inbuild: $(BIN_PATH)/$(BIN_NAME)
 	@echo "Making symlink: $(BIN_NAME) -> $<"
 	@$(RM) $(BIN_NAME)
 	@ln -s $(BIN_PATH)/$(BIN_NAME) $(BIN_NAME)
